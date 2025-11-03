@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password      String?  // Nullable for OAuth users
+  role          String   @default("student") // "student" | "coach"
+  avatar        String?
+  phone         String?
+  bio           String?
+  specialties   String? // JSON array as string for SQLite
+  rating        Float?   @default(0)
+  price         Float?   // For coaches
+  totalSessions Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // OAuth fields
+  googleId      String?  @unique
+  facebookId    String?  @unique
+  appleId       String?  @unique
+
+  // Relations
+  sessionsAsStudent Session[] @relation("StudentSessions")
+  sessionsAsCoach  Session[] @relation("CoachSessions")
+  videos            Video[]
+  payments          Payment[]
+  refreshTokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Session {
+  id                 String   @id @default(uuid())
+  type               String   // "individual" | "group"
+  date               String   // ISO date string
+  time               String   // Time string HH:mm
+  duration           Int      @default(60) // minutes
+  status             String   @default("pending") // "pending" | "confirmed" | "completed" | "cancelled"
+  maxParticipants    Int?
+  currentParticipants Int    @default(0)
+  price              Float?
+  location           String?
+  notes              String?
+  mentorId           String
+  studentId          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  coach   User   @relation("CoachSessions", fields: [mentorId], references: [id])
+  student User?  @relation("StudentSessions", fields: [studentId], references: [id])
+  videos  Video[]
+  payments Payment[]
+
+  @@map("sessions")
+}
+
+model Video {
+  id        String   @id @default(uuid())
+  url       String
+  filename  String
+  size      Int?     // bytes
+  duration  Int?     // seconds
+  sessionId String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   Session?     @relation(fields: [sessionId], references: [id])
+  feedback  VideoFeedback?
+
+  @@map("videos")
+}
+
+model VideoFeedback {
+  id          String   @id @default(uuid())
+  videoId     String   @unique
+  coachId     String
+  rating      Int?     // 1-5
+  comments    String
+  improvements String? // JSON array as string
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@map("video_feedback")
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  userId        String
+  sessionId     String?
+  amount        Float
+  currency      String   @default("USD")
+  status        String   @default("pending") // "pending" | "completed" | "failed" | "refunded"
+  paymentMethod String?  // "stripe" | "paypal" | "card"
+  transactionId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  session Session? @relation(fields: [sessionId], references: [id])
+
+  @@map("payments")
+}
+
+

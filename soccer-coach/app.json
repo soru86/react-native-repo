@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Soccer Coach",
+    "slug": "soccer-coach",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.soccercoach.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "This app accesses your photos to upload videos for coaching feedback.",
+        "NSCameraUsageDescription": "This app accesses your camera to record videos for coaching feedback."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.soccercoach.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {},
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share videos for coaching feedback.",
+          "cameraPermission": "The app accesses your camera to let you record videos for coaching feedback."
+        }
+      ],
+      "expo-font"
+    ],
+    "scheme": "soccercoach",
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
+}
